@@ -1,7 +1,7 @@
 [project]
 name = "dose-of-dm"
 version = "0.1.0"
-description = "Add your description here"
+description = "Adaptive decision making experiments."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
