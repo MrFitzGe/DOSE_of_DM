@@ -40,7 +40,8 @@ def two_outcome_choice(
 
 ### softmax_multi_choice
 def multi_outcome_choice(
-    vals: list | dict | np.ndarray | pl.Expr, choice_consistency: float
+    vals: list | dict | np.ndarray | pl.Expr,
+    choice_consistency: float,
 ) -> tuple[pl.Expr, float | pl.Expr]:
     """
     Softmax choice between multiple outcomes.
@@ -97,7 +98,8 @@ def multi_outcome_choice(
 
 # loss aversion valuation
 def loss_aversion_sv(
-    amount: float | int | pl.Expr, lambda_param: float | int | pl.Expr
+    amount: float | int | pl.Expr,
+    lambda_param: float | int | pl.Expr,
 ) -> float | pl.Expr:
     """
     Calculates subjective value with loss aversion.
@@ -113,7 +115,8 @@ def loss_aversion_sv(
 
 # risk aversion valuation
 def risk_aversion_sv(
-    amount: float | int | pl.Expr, rho: float | int | pl.Expr
+    amount: float | int | pl.Expr,
+    rho: float | int | pl.Expr,
 ) -> float | pl.Expr:
     """
     Calculates subjective value with risk aversion (power utility).

@@ -20,3 +20,11 @@ The algorithm optimizes information gain towards a participant's indiference poi
 
 * [Unexpected Improvements to Expected Improvement
 for Bayesian Optimization](https://proceedings.neurips.cc/paper_files/paper/2023/file/419f72cbd568ad62183f8132a3605a2a-Paper-Conference.pdf)
+
+
+## Subjective Value computational models
+* loss and risk aversion via prospect theory (Kahneman & Tversky)
+* hyperbolic model used to represent temporal discounting (Ainslie; Mazur 1975)
+* probability discounting model (Green and Myerson)
+* sigmoidal model of effort discounting (Klein-Flugge et al. 2015)
+* power model of effort discounintg (Hartmann, Hager, Tobler, and Kaiser 2013; Wojciech Białaszek ,Przemysław Marcowski,Paweł Ostaszewski 2017)
