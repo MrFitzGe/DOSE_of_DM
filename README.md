@@ -1,5 +1,5 @@
 # Rolladex
-![Rolladex logo](https://github.com/MrFitzGe/DOSE_of_DM/Rolladex_logo.png?raw=true)
+![Rolladex logo](https://github.com/MrFitzGe/DOSE_of_DM/blob/main/Rolladex_logo.png?raw=true)
 
 ## Adaptive Decision Making Experiments
 Common methodology for eliciting decision preferences in participants using repeated choice task trials with varying parameters. This repo was inspired by the
