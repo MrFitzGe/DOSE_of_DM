@@ -91,14 +91,14 @@ choices = np.array([trial[1]["choice"] for trial in preexisting_trials])
 result = fit_hyperbolic_discount(a1_list, c1_list, a2_list, c2_list, choices)
 
 # Print results
-"""
+
 print("Fitted Parameters:")
 print(f"k (discount parameter): {result['k']:.6f}")
 print(f"choice_consistency: {result['beta']:.6f}")
 print(f"Entropy of model fit: {result['entropy']:.6f}")
 print(f"Negative Log Likelihood: {result['negative_log_likelihood']:.6f}")
 print(f"Optimization success: {result['success']}")
-"""
+
 
 for parameters, data in preexisting_trials:
     # Attach the parameterization to the Client as a trial and immediately complete it with the preexisting data
