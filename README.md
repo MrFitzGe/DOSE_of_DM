@@ -37,8 +37,8 @@ for Bayesian Optimization](https://proceedings.neurips.cc/paper_files/paper/2023
 
 
 ## RoadMap TODO list
-[ ] Past choice memory + entropy calculation outside of the GP == how should the interface work between participant / experimenter / Ax client?
-[ ] Early stopping alerts (what is the threshold? how do we determine this)
-[ ] Add other models than just hyperbolic discounting and have an organized system for model selection
-[ ] Ax analyses and plots
-[ ] Set up the experiment = interface for the experimenter and the hyperparameters like number of burn in trials, how to set them, model selection, number of parameters (need to update AIC calcs), etc.
+* [ ] Past choice memory + entropy calculation outside of the GP == how should the interface work between participant / experimenter / Ax client?
+* [ ] Early stopping alerts (what is the threshold? how do we determine this)
+* [ ] Add other models than just hyperbolic discounting and have an organized system for model selection
+* [ ] Ax analyses and plots
+* [ ] Set up the experiment = interface for the experimenter and the hyperparameters like number of burn in trials, how to set them, model selection, number of parameters (need to update AIC calcs), etc.
