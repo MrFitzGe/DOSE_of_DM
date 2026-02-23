@@ -20,7 +20,6 @@ def _():
     from loguru import logger
 
     from fit_model import fit_hyperbolic_discount
-
     return (
         Client,
         IMetric,
@@ -33,6 +32,20 @@ def _():
         random,
         time,
     )
+
+
+@app.cell
+def _():
+    # Default burn-in trials
+    default_burn_in_trials = [
+        {"amount_1": 5, "cost_1": 0, "amount_2": 12, "cost_2": 25},
+        {"amount_1": 1, "cost_1": 0, "amount_2": 15, "cost_2": 55},
+        {"amount_1": 7, "cost_1": 0, "amount_2": 100, "cost_2": 40},
+        {"amount_1": 10, "cost_1": 0, "amount_2": 20, "cost_2": 65},
+        {"amount_1": 5, "cost_1": 0, "amount_2": 20, "cost_2": 15},
+        {"amount_1": 10, "cost_1": 0, "amount_2": 39, "cost_2": 72},
+    ]
+    return (default_burn_in_trials,)
 
 
 @app.cell
@@ -71,8 +84,8 @@ def _(mo):
             **Option Position (Sm. vs Lg.)**
             {position_mode}
 
-            **Max Trials**
-            {max_trials}
+            **Max. Generated Trials**
+            {max_gen_trials}
             """
         )
         .batch(
@@ -91,7 +104,7 @@ def _(mo):
                 value="Randomized",
                 label="",
             ),
-            max_trials=mo.ui.number(start=5, stop=100, step=1, value=20, label=""),
+            max_gen_trials=mo.ui.number(start=5, stop=100, step=1, value=20, label=""),
         )
         .form(submit_button_label="Save Settings")
     )
@@ -126,29 +139,14 @@ def _(Client, IMetric, RangeParameterConfig):
             ]
         )
         return client
-
     return (initialize_ax_client,)
 
 
 @app.cell
-def _():
-    # Default burn-in trials
-    default_burn_in_trials = [
-        {"amount_1": 5, "cost_1": 0, "amount_2": 12, "cost_2": 25},
-        {"amount_1": 1, "cost_1": 0, "amount_2": 15, "cost_2": 55},
-        {"amount_1": 7, "cost_1": 0, "amount_2": 100, "cost_2": 40},
-        {"amount_1": 10, "cost_1": 0, "amount_2": 20, "cost_2": 65},
-        {"amount_1": 5, "cost_1": 0, "amount_2": 20, "cost_2": 15},
-        {"amount_1": 10, "cost_1": 0, "amount_2": 39, "cost_2": 72},
-    ]
-    return (default_burn_in_trials,)
-
-
-@app.cell
 def _(default_burn_in_trials, initialize_ax_client):
-    def build_presentation_plan(max_trials, layout_mode, position_mode, rng):
+    def build_presentation_plan(max_gen_trials, layout_mode, position_mode, rng):
         plan = []
-        for _ in range(max_trials):
+        for _ in range(max_gen_trials):
             layout = layout_mode
             if layout == "Mixed":
                 layout = rng.choice(["Left-Right", "Top-Bottom"])
@@ -173,9 +171,8 @@ def _(default_burn_in_trials, initialize_ax_client):
         "last_fit": None,
         "presentation_plan": [],
         "start_clicks": 0,
-        "choice_clicks": {"ss": 0, "ll": 0},
+        "choice_clicks": {"sm": 0, "lg": 0},
     }
-
     return build_presentation_plan, session
 
 
@@ -188,7 +185,7 @@ def _(
     initialize_ax_client,
     layout_mode,
     logger,
-    max_trials,
+    max_gen_trials,
     mo,
     os,
     pl,
@@ -205,7 +202,7 @@ def _(
         session["finished"] = False
         session["last_fit"] = None
         session["presentation_plan"] = build_presentation_plan(
-            max_trials.value,
+            max_gen_trials.value,
             layout_mode.value,
             position_mode.value,
             random,
@@ -227,7 +224,7 @@ def _(
             stimuli = session["burn_in"][idx]
         else:
             # Ax adaptive trial
-            trial_params, _ = session["ax_client"].get_next_trials(max_trials=1)
+            trial_params, _ = session["ax_client"].get_next_trials(max_gen_trials=1)
             # Ax returns a dict of {trial_index: parameters}
             stimuli = list(trial_params.values())[0]
 
@@ -303,7 +300,7 @@ def _(
             )
 
         next_idx = session["trial_idx"] + 1
-        is_finished = next_idx >= max_trials.value
+        is_finished = next_idx >= max_gen_trials.value
 
         session["trial_idx"] = next_idx
         session["last_fit"] = fit_results
@@ -326,7 +323,7 @@ def _(
     start_button = mo.ui.button(label="Start Experiment")
     sm_button = mo.ui.button(label="Select", full_width=False)
     lg_button = mo.ui.button(label="Select", full_width=False)
-    return handle_choice, start_button, start_experiment, sm_button, lg_button
+    return handle_choice, lg_button, sm_button, start_button, start_experiment
 
 
 @app.cell
@@ -357,8 +354,8 @@ def _(
         if start_button.value != state["start_clicks"]:
             state["start_clicks"] = start_button.value
             start_experiment()
-            state["choice_clicks"]["ss"] = sm_button.value
-            state["choice_clicks"]["ll"] = lg_button.value
+            state["choice_clicks"]["sm"] = sm_button.value
+            state["choice_clicks"]["lg"] = lg_button.value
             state = session
 
         content = mo.center(mo.vstack([mo.md("# Ready to begin?"), start_button]))
@@ -377,13 +374,13 @@ def _(
             )
         )
     else:
-        if sm_button.value != state["choice_clicks"]["ss"]:
-            state["choice_clicks"]["ss"] = sm_button.value
+        if sm_button.value != state["choice_clicks"]["sm"]:
+            state["choice_clicks"]["sm"] = sm_button.value
             handle_choice(0)
             state = session
 
-        if lg_button.value != state["choice_clicks"]["ll"]:
-            state["choice_clicks"]["ll"] = lg_button.value
+        if lg_button.value != state["choice_clicks"]["lg"]:
+            state["choice_clicks"]["lg"] = lg_button.value
             handle_choice(1)
             state = session
 
@@ -420,7 +417,7 @@ def _(
             content = mo.vstack(
                 [
                     mo.md(
-                        f"### Trial {state['trial_idx'] + 1} of {setup_form.value['max_trials']}"
+                        f"### Trial {state['trial_idx'] + 1} of {setup_form.value['max_gen_trials']}"
                     ),
                     mo.center(display),
                 ]
@@ -431,16 +428,21 @@ def _(
 
 
 @app.cell
-def _(setup_form):
-    setup_form.value
-    return
-
-
-@app.cell
-def _(mo, session):
+def _(mo, session, setup_form):
     fit = session["last_fit"]
 
-    if fit:
+    # Initialize an empty list for dashboard components
+    dashboard_components = []
+
+    # Add setup parameters if they exist
+    if setup_form.value is not None:
+        dashboard_components.extend([
+            mo.md("### Experiment Setup Parameters"),
+            setup_form.value,
+        ])
+
+    # Add model estimates if they exist
+    if fit is not None:
         stats = mo.hstack(
             [
                 mo.stat(label="k (Discount Rate)", value=f"{fit['k']:.4f}"),
@@ -449,25 +451,18 @@ def _(mo, session):
             ],
             justify="start",
         )
+        dashboard_components.extend([
+            mo.md("### Real-time Model Estimates"),
+            stats,
+        ])
 
-        dashboard = mo.vstack([mo.md("### Real-time Model Estimates"), stats])
+    # Build the final dashboard
+    if dashboard_components:
+        dashboard = mo.vstack(dashboard_components)
     else:
         dashboard = mo.md("_Model will update after the first choice._")
 
     mo.sidebar(dashboard)
-    return
-
-
-@app.cell
-def _(pl, session):
-    # This cell is just for debugging or viewing history in the notebook
-    _history = session["history"]
-    if _history:
-        history_df = pl.DataFrame(_history)
-    else:
-        history_df = None
-
-    history_df
     return
 
 
